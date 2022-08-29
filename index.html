@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>EGC Diagnostico</title>
+    <!-- Estilos -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap&subset=latin-ext" rel="stylesheet">
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/fontawesome-all.css" rel="stylesheet">
+    <link href="css/swiper.css" rel="stylesheet">
+	<link href="css/magnific-popup.css" rel="stylesheet">
+	<link href="css/styles.css" rel="stylesheet">
+	<!-- Icono web  -->
+    <link rel="icon" href="./assets/stethoscope 1.svg">
+</head>
+<body data-spy="scroll" data-target=".fixed-top">
+  
+    <!-- Header -->
+    <header id="header" class="header">
+        <div class="header-content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 col-xl-5">
+                        <div class="text-container">
+                            <h1>Diagnostico de Enfermedades Cardiovasculares </h1>
+                            <p class="p-large">Suba una imagen y realize un diagnóstico </p>
+                            <a class="btn-solid-lg " onclick="predecir()"  style="cursor: pointer; " >Diagnosticar</a>
+                            <div class="spinner-border text-light" id="spinner" style="margin-top:15px;visibility: hidden;" role="status">
+                                <span class="visually-hidden"></span>
+                            </div>
+                            <br><br>
+                            <b>
+                                <h7 style="color: white; ">Resultado de Diagnóstico:</h7> 
+                                <h5  id="resultado_prediccion" style="color: white;"></h5>
+                            </b>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-xl-7">
+                        <div class="image-container">
+                            <div class="img-wrapper">
+                                <form runat="server">
+                                    <input accept="image/*" type="file" id="imgInp" style="display:none ;"/>
+                                    <img  style=" cursor: pointer;" 
+                                            onclick="readImg()"    id="blah" 
+                                        class="img-fluid" src="images/electronormal.jpg" alt="alternative">
+                                </form>
+                            </div>
+                        </div> 
+                    </div> 
+                </div>
+            </div>
+        </div> 
+    </header>
+    <svg class="header-frame" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1920 310"><defs><style>.cls-1{fill:#5f4def;}</style></defs><title>header-frame</title><path class="cls-1" d="M0,283.054c22.75,12.98,53.1,15.2,70.635,14.808,92.115-2.077,238.3-79.9,354.895-79.938,59.97-.019,106.17,18.059,141.58,34,47.778,21.511,47.778,21.511,90,38.938,28.418,11.731,85.344,26.169,152.992,17.971,68.127-8.255,115.933-34.963,166.492-67.393,37.467-24.032,148.6-112.008,171.753-127.963,27.951-19.26,87.771-81.155,180.71-89.341,72.016-6.343,105.479,12.388,157.434,35.467,69.73,30.976,168.93,92.28,256.514,89.405,100.992-3.315,140.276-41.7,177-64.9V0.24H0V283.054Z"/></svg>
+    <script>
+        function readImg() {
+            document.getElementById("imgInp").click();
+        }
+        let img64 = '';
+        imgInp.onchange = (evt) => {
+            const file = evt.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (evt) => {
+                img64 = evt.target.result;
+                document.getElementById('blah').src = img64;
+                };
+            }
+        };
+
+
+        let predecir_active= false;
+        function predecir(){
+            if( !img64.trim() || predecir_active){
+                return;
+            }
+            predecir_active = true;
+            document.getElementById('spinner').style.visibility = "visible";
+            console.log( img64 )
+            let stringImg = img64.split(',').pop();
+                postData(stringImg ).then((data) => {
+                    // asignar data a resultado_prediccion
+                    predecir_active = false;
+                    document.getElementById('resultado_prediccion').innerHTML = data;
+                    document.getElementById('spinner').style.visibility = "hidden";
+            });
+        }
+
+        async function postData(data) {
+            
+        const response = await fetch( 'http://localhost:3210/img', {
+            method: "POST",
+            mode: "cors",  
+            cache: "no-cache", 
+            credentials: "same-origin", 
+            headers: {
+            "Content-type": "application/json"
+            },
+            redirect: "follow",  
+            referrerPolicy: "no-referrer",
+            body: JSON.stringify({img:data}),
+        });
+        return response.json();
+        }
+
+    </script>
+
+ </body>
+</html>
